@@ -1,11 +1,15 @@
 # set async_mode to 'threading', 'eventlet', 'gevent' or 'gevent_uwsgi' to
 # force a mode else, the best mode is selected automatically from what's
 # installed
-async_mode = None
-
+from __future__ import division
+from subprocess import PIPE, Popen
 import time
 from flask import Flask, render_template
 import socketio
+import psutil
+
+async_mode = None
+
 
 sio = socketio.Server(logger=True, async_mode=async_mode)
 app = Flask(__name__)
@@ -18,9 +22,11 @@ def background_thread():
     """Example of how to send server generated events to clients."""
     count = 0
     while True:
-        sio.sleep(10)
+        cpu = psutil.cpu_percent(interval=1);
+        vm = psutil.virtual_memory().percent;
+        sio.sleep(1)
         count += 1
-        sio.emit('my response', {'data': 'Server generated event'},
+        sio.emit('my response', {'data': "CPU Percentage: %f" %cpu},
                  namespace='/test')
 
 
